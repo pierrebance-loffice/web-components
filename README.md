@@ -1,2 +1,3 @@
-# web-components
-Test Web Components
+# Web components test
+
+Test of web components

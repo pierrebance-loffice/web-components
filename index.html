@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Custom Web Component Demo</title>
+    <script>
+      items = [
+        {
+          title: "Title 1",
+          description: "Description 1",
+          time: "2025-01-03",
+        },
+        {
+          title: "Title 2",
+          description: "Description 2",
+          time: "2025-01-02",
+        },
+        {
+          title: "Title 3",
+          description: "Description 3",
+          time: "2025-01-01",
+        },
+        {
+          title: "Title 4",
+          description: "Description 4",
+          time: "2024-01-01",
+        },
+      ];
+    </script>
+  </head>
+  <body>
+    <div>
+      <my-list id="my-list-id">
+        <h2 slot="title">Dynamically populated list</h2>
+        <div slot="content" />
+      </my-list>
+    </div>
+
+    <template id="my-list-template">
+      <style>
+        .my-list {
+          border: 2px solid #ff7b00;
+          padding: 1em;
+          border-radius: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .my-list-title {
+          border: 2px solid #007bff;
+          border-radius: 10px;
+          padding: 0.5em;
+        }
+        .my-list-body {
+          border: 2px solid #7be0e07b;
+          padding: 0.5em;
+          border-radius: 20px;
+          background-color: #e0e0e0;
+          display: flex;
+          gap: 10px;
+        }
+      </style>
+      <div class="my-list">
+        <div class="my-list-title">
+          <slot name="title">Name of the list</slot>
+        </div>
+        <div class="my-list-body"><slot name="content"></slot></div>
+      </div>
+    </template>
+
+    <template id="my-item-template">
+      <style>
+        .my-table {
+          border: 2px solid #ff7b00;
+          padding: 0.5em;
+          border-radius: 20px;
+          background-color: aqua;
+        }
+        td {
+          padding: 0.25em;
+        }
+      </style>
+      <slot name="item-title">Default title</slot>
+      <table class="my-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Description</td>
+            <td>
+              <slot name="item-description">Default description</slot>
+            </td>
+          </tr>
+          <tr>
+            <td>Time</td>
+            <td>
+              <slot name="item-time">Default time</slot>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </template>
+
+    <script>
+      class MyItem extends HTMLElement {
+        constructor() {
+          super();
+          const template = document.getElementById("my-item-template");
+          const shadow = this.attachShadow({ mode: "open" });
+          shadow.appendChild(template.content.cloneNode(true));
+        }
+      }
+      customElements.define("my-item", MyItem);
+
+      class MyList extends HTMLElement {
+        constructor() {
+          super();
+          const template = document.getElementById("my-list-template");
+          const shadow = this.attachShadow({ mode: "open" });
+          shadow.appendChild(template.content.cloneNode(true));
+        }
+
+        addItem(item) {
+          const contentSlot = this.shadowRoot.querySelector(".my-list-body");
+          const myItem = document.createElement("my-item");
+
+          const title = document.createElement("h3");
+          title.setAttribute("slot", "item-title");
+          title.textContent = item.title;
+
+          const description = document.createElement("p");
+          description.setAttribute("slot", "item-description");
+          description.textContent = item.description;
+
+          const time = document.createElement("p");
+          time.setAttribute("slot", "item-time");
+          time.textContent = item.time;
+
+          myItem.appendChild(title);
+          myItem.appendChild(description);
+          myItem.appendChild(time);
+
+          contentSlot.appendChild(myItem);
+        }
+      }
+      customElements.define("my-list", MyList);
+    </script>
+
+    <script>
+      // Initialize the list with items
+      document.addEventListener("DOMContentLoaded", () => {
+        const myList = document.querySelector("#my-list-id");
+        items.forEach((item) => myList.addItem(item));
+      });
+    </script>
+  </body>
+</html>
